@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>League of Legends</title>
+    <style>
+        body {
+            background-color: #1a1a1a; /* Dark background */
+            color: #f0e6f6; /* Light text */
+            font-family: Arial, sans-serif;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #ff914d; /* Orange for headers */
+        }
+        .leaderboards-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 20px auto;
+            width: 100%;
+        }
+        .leaderboard {
+            width: 30%; /* Adjust leaderboard width to fit multiple side-by-side */
+            margin: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #2d2d2d; /* Darker background for table */
+            color: #f0e6f6; /* Light text for table */
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #444; /* Subtle border */
+            text-align: center;
+        }
+        th {
+            background-color: #5c0d7a; /* Purple header */
+            color: #ff914d; /* Orange text for header */
+        }
+        td {
+            background-color: #3b3b3b; /* Dark grey for cells */
+        }
+        tr:nth-child(even) td {
+            background-color: #333; /* Slightly lighter row for even rows */
+        }
+        tr:nth-child(odd) td {
+            background-color: #292929; /* Slightly darker row for odd rows */
+        }
+    </style>
+</head>
+<body>
+    <h1>League of Legends</h1>
+
+    <div class="leaderboards-container">
+        <div class="leaderboard">
+            <h2>Week 1 Leaderboard</h2>
+            <table id="week1-leaderboard">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player Name</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="leaderboard">
+            <h2>Week 2 Leaderboard</h2>
+            <table id="week2-leaderboard">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player Name</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="leaderboard">
+            <h2>Week 3 Leaderboard</h2>
+            <table id="week3-leaderboard">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player Name</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="leaderboards-container">
+        <div class="leaderboard">
+            <h2>Week 4 Leaderboard</h2>
+            <table id="week4-leaderboard">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player Name</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="leaderboard">
+            <h2>Week 5 Leaderboard</h2>
+            <table id="week5-leaderboard">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player Name</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="leaderboard">
+            <h2>Overall Leaderboard</h2>
+            <table id="overall-leaderboard">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player Name</th>
+                        <th>Total Score</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Your Google Sheets API key
+        const apiKey = 'AIzaSyAA5CtyHTwxjkbO75tUA9TEZyGfOfWpggM';
+
+        // Google Sheet ID
+        const sheetId = '1F5mOfFhyqmwt3u_U78gg3POQUndLEJpjC3RAnc58QYY';
+
+        // Ranges for each leaderboard
+        const ranges = {
+            week1: 'Weekly LeaderBoard!K:L',
+            week2: 'Weekly LeaderBoard!M:N',
+            week3: 'Weekly LeaderBoard!O:P',
+            week4: 'Weekly LeaderBoard!Q:R',
+            week5: 'Weekly LeaderBoard!S:T',
+            overall: 'Weekly LeaderBoard!V:W'
+        };
+
+        // Function to get data from Google Sheets
+        async function getSheetData(range) {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            return data.values || [];
+        }
+
+        // Function to display a leaderboard
+        async function displayLeaderboard(range, tableId) {
+            const data = await getSheetData(range);
+            const leaderboard = document.querySelector(`#${tableId} tbody`);
+            leaderboard.innerHTML = '';  // Clear existing data
+
+            // Array to store valid player data
+            const rows = [];
+
+            // Loop through data and collect valid rows with player names and scores
+            data.forEach(row => {
+                const playerName = row[0];
+                const score = parseInt(row[1], 10);  // Convert score to integer
+
+                // Only push rows where playerName exists and score is a valid number greater than 0
+                if (playerName && !isNaN(score) && score > 0) {
+                    rows.push({ playerName, score });
+                }
+            });
+
+            // Sort rows by score in descending order (highest score first)
+            rows.sort((a, b) => b.score - a.score);
+
+            // Display the sorted rows in the leaderboard
+            rows.forEach((row, index) => {
+                leaderboard.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${row.playerName}</td>
+                        <td>${row.score}</td>
+                    </tr>
+                `;
+            });
+
+            // If there are fewer than 5 players, fill in remaining ranks with "No Data"
+            for (let i = rows.length; i < 5; i++) {
+                leaderboard.innerHTML += `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>No Data</td>
+                        <td>0</td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Function to display the overall leaderboard
+        async function displayOverallLeaderboard() {
+            const week1Data = await getSheetData(ranges.week1);
+            const week2Data = await getSheetData(ranges.week2);
+            const week3Data = await getSheetData(ranges.week3);
+            const week4Data = await getSheetData(ranges.week4);
+            const week5Data = await getSheetData(ranges.week5);
+
+            const combinedScores = {};
+
+            // Aggregate scores from each week
+            [week1Data, week2Data, week3Data, week4Data, week5Data].forEach(weekData => {
+                weekData.forEach(row => {
+                    const playerName = row[0];
+                    const score = parseInt(row[1], 10) || 0;
+                    if (playerName) {
+                        combinedScores[playerName] = (combinedScores[playerName] || 0) + score;
+                    }
+                });
+            });
+
+            const leaderboard = document.querySelector('#overall-leaderboard tbody');
+            leaderboard.innerHTML = '';  // Clear existing data
+
+            // Convert combinedScores object to an array and sort by score
+            const sortedScores = Object.entries(combinedScores).sort(([,a], [,b]) => b - a);
+
+            // Display sorted leaderboard
+            sortedScores.forEach(([playerName, score], index) => {
+                leaderboard.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${playerName}</td>
+                        <td>${score}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Fetch and display leaderboards when the page loads
+        async function updateLeaderboards() {
+            await displayLeaderboard(ranges.week1, 'week1-leaderboard');
+            await displayLeaderboard(ranges.week2, 'week2-leaderboard');
+            await displayLeaderboard(ranges.week3, 'week3-leaderboard');
+            await displayLeaderboard(ranges.week4, 'week4-leaderboard');
+            await displayLeaderboard(ranges.week5, 'week5-leaderboard');
+            await displayOverallLeaderboard();
+        }
+
+        updateLeaderboards();
+
+        // Update leaderboards every 30 seconds
+        setInterval(updateLeaderboards, 30000);
+    </script>
+</body>
+</html>
