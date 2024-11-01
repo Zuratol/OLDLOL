@@ -10,4 +10,4 @@ echo '{
   "name": "league-leaderboard",
   "version": "1.0.0",
   "description": "League of Legends Leaderboard"
-}' > package.json
+}'
